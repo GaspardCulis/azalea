@@ -6,6 +6,7 @@ pub mod prelude;
 
 use std::{collections::HashMap, future::Future, net::SocketAddr, sync::Arc, time::Duration};
 
+use anyhow::anyhow;
 use azalea_client::{
     chat::ChatPacket, start_ecs_runner, Account, Client, DefaultPlugins, Event, JoinError,
     StartClientOpts,
@@ -355,7 +356,11 @@ where
 
         let (run_schedule_sender, run_schedule_receiver) = mpsc::unbounded_channel();
 
-        let main_schedule_label = self.app.main_schedule_label;
+        let main_schedule_label = self
+            .app
+            .main()
+            .update_schedule
+            .expect("Failed to get main SubApp update_schedule");
 
         let ecs_lock =
             start_ecs_runner(self.app, run_schedule_receiver, run_schedule_sender.clone());
